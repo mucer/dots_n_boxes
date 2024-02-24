@@ -5,7 +5,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "GameLogic.cpp"
 #ifdef __AVR__
- #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
+#include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
 // Which pin on the Arduino is connected to the NeoPixels?
@@ -27,8 +27,7 @@ GameLogic gameLogic;
 void setup() {
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   Serial.begin(9600);
-Serial.println("setup");
-  gameLogic.init();
+  Serial.println("setup");
 }
 
 

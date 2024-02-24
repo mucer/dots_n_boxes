@@ -7,8 +7,17 @@ enum class Side { FRONT,
                   TOP,
                   RIGHT };
 
-struct Player {
+struct CellPos {
+  Side side;
   int x, y;
+
+  bool operator==(const CellPos& other) const {
+    return side == other.side && x == other.x && y == other.y;
+  }
+};
+
+struct Player {
+  CellPos pos;
   Direction direction;
 };
 
@@ -32,12 +41,29 @@ public:
     updateMatrix();
   }
 
-  CellPlayerData* getCellPlayerData(int x, int y, int p) {
-    return &data[y * cols + x + p * rows * cols];
+  CellPlayerData* getCellPlayerData(CellPos pos, int p) {
+    return &data[pos.y * cols + pos.x + p * rows * cols];
   }
 
   Player* getPlayer(int p) {
     return &players[p];
+  }
+
+  void movePos(CellPos* pos, Direction direction) {
+    switch (direction) {
+      case Direction::UP:
+        if (pos->y > 0) pos->y--;
+        break;
+      case Direction::DOWN:
+        if (pos->y < rows - 1) pos->y++;
+        break;
+      case Direction::LEFT:
+        if (pos->x > 0) pos->x--;
+        break;
+      case Direction::RIGHT:
+        if (pos->x < cols - 1) pos->x++;
+        break;
+    }
   }
 
 private:
@@ -51,29 +77,14 @@ private:
     for (int i = 0; i < cellCount; i++)
       data[i] = { false, false, false };
     players = new Player[2];
-    players[0] = { 0, 0, Direction::RIGHT };
-    players[1] = { 1, 1, Direction::LEFT };
+    players[0] = { { Side::FRONT, 0, 0 }, Direction::RIGHT };
+    players[1] = { { Side::FRONT, 1, 1 }, Direction::LEFT };
   }
 
   void movePlayers() {
-    for (int i = 0; i < numPlayers; i++)
-      movePlayer(&players[i]);
-  }
-
-  void movePlayer(Player* player) {
-    switch (player->direction) {
-      case Direction::UP:
-        if (player->y > 0) player->y--;
-        break;
-      case Direction::DOWN:
-        if (player->y < rows - 1) player->y++;
-        break;
-      case Direction::LEFT:
-        if (player->x > 0) player->x--;
-        break;
-      case Direction::RIGHT:
-        if (player->x < cols - 1) player->x++;
-        break;
+    for (int i = 0; i < numPlayers; i++) {
+      Player* player = &players[i];
+      movePos(&player->pos, player->direction);
     }
   }
 
@@ -81,17 +92,18 @@ private:
     for (int y = 0; y < rows; y++) {
       for (int x = 0; x < cols; x++) {
         for (int p = 0; p < numPlayers; p++) {
-          updateCell(x, y, p);
+          CellPos pos = { Side::FRONT, x, y };
+          updateCell(pos, p);
         }
       }
     }
   }
 
-  void updateCell(int x, int y, int p) {
+  void updateCell(CellPos pos, int p) {
     Player* player = getPlayer(p);
-    CellPlayerData* cell = getCellPlayerData(x, y, p);
-    cell->atPosition = x == player->x && y == player->y;
-    if (cell->atPosition) {
+    CellPlayerData* cell = getCellPlayerData(pos, p);
+    cell->atPosition = pos == player->pos;
+    if (cell->atPosition && !cell->activeTrail) {
       cell->activeTrail = true;
     }
   }
