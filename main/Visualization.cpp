@@ -37,8 +37,13 @@ public:
   **/
   int drawPixel(Side side, int x, int y, uint32_t color)
   {
-    int i; // strip index
+    if (x >= X || x < 0) return 1;
+    if (y >= Y || y < 0) return 1;
 
+    int i; // strip index
+    int max = (X * Y * 2);
+
+    // --- first Strip
     if (side == Side::FRONT) 
     {
         if(y % 2 == 0) // ->
@@ -61,14 +66,28 @@ public:
           i = (X - x - 1) + (y * (X * 2) + X);
         }
     }
+
+    // --- second Strip
+    else if(side == Side::TOP)
+    {
+        if(y % 2 == 0) // <-
+        {
+          i = max - ( x + (X * y * 2) + 1 );
+        }
+        else // ->
+        {
+          i = max - ( (X - x - 1) + (y * (X * 2) + X) + 1);
+        }
+        
+    }
     else if (side == Side::RIGHT) 
     {
-      // right_top
+        // TODO
     }
-    else if (side == Side::TOP) 
-    {
-      // right_top
-    }
+    
+    
+    if (side == Side::LEFT || side == Side::FRONT)  front_left.setPixelColor(i, color);
+    if (side == Side::TOP || side == Side::RIGHT)  right_top.setPixelColor(i, color);
     Serial.println(i);
     return -1;
   }
