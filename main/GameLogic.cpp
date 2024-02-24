@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 enum class Direction { UP,
                        DOWN,
                        LEFT,
@@ -30,7 +28,6 @@ public:
   void tick() {
     movePlayers();
     updateMatrix();
-    print();
   }
 
   CellPlayerData* getCellPlayerData(int x, int y, int p) {
@@ -97,25 +94,5 @@ private:
     if (cell->atPosition) {
       cell->activeTrail = true;
     }
-  }
-
-  void print() {
-    for (int y = 0; y < rows; y++) {
-      String line = "";
-      for (int x = 0; x < cols; x++) {
-        for (int p = 0; p < numPlayers; p++) {
-          line = line + cellToString(x, y, p);
-        }
-        line = line + " ";
-      }
-      Serial.println(line);
-    }
-    Serial.println("");
-  }
-
-  String cellToString(int x, int y, int p) {
-    CellPlayerData* cell = getCellPlayerData(x, y, p);
-    String out = "";
-    return out + (cell->atPosition ? 'P' : '-') + (cell->activeTrail ? 'T' : '-') + (cell->ownedBy ? 'O' : '-');
   }
 };
