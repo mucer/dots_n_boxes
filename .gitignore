@@ -1,0 +1,6 @@
+.vscode/
+src/lib/
+src/CMakeFiles/
+src/CMakeCache.txt
+src/*.cmake
+src/*.a

@@ -18,7 +18,9 @@ struct CellPlayerData {
 
 class GameLogic {
 public:
-  GameLogics() {
+  GameLogic() {
+    initArrays();
+    updateMatrix();
   }
   ~GameLogic() {
     delete[] data;
@@ -38,7 +40,12 @@ public:
     return &players[p];
   }
 
-  void init() {
+private:
+  int numPlayers = 2, rows = 4, cols = 4;
+  CellPlayerData* data;
+  Player* players;
+
+  void initArrays() {
     int cellCount = rows * cols * numPlayers;
     data = new CellPlayerData[cellCount];
     for (int i = 0; i < cellCount; i++)
@@ -46,14 +53,7 @@ public:
     players = new Player[2];
     players[0] = { 0, 0, Direction::RIGHT };
     players[1] = { 1, 1, Direction::LEFT };
-
-    updateMatrix();
   }
-
-private:
-  int numPlayers = 2, rows = 4, cols = 4;
-  CellPlayerData* data;
-  Player* players;
 
   void movePlayers() {
     for (int i = 0; i < numPlayers; i++)

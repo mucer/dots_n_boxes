@@ -1,5 +1,15 @@
 # Dots'n'Boxes
 
+## Tests
+
+```bash
+make
+cd src
+cmake
+make
+./tests
+```
+
 ## Hardware
 
 900 Pixels are available.

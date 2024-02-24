@@ -14,6 +14,9 @@
         pkgs.mkShell { buildInputs = 
           [         
             pkgs.arduino-ide
+            pkgs.gnumake
+            pkgs.wget
+            pkgs.cmake
           ];
 
         };
