@@ -3,6 +3,7 @@
 // Adafruit NeoPixel library
 
 #include <Adafruit_NeoPixel.h>
+#include "GameLogic.cpp"
 #ifdef __AVR__
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
@@ -19,25 +20,23 @@
 // strandtest example for more information on possible values.
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-#define DELAYVAL 20 // Time (in milliseconds) to pause between pixels
+#define DELAYVAL 1000 // Time (in milliseconds) to pause between pixels
+
+GameLogic gameLogic;
 
 void setup() {
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
+  Serial.begin(9600);
+Serial.println("setup");
+  gameLogic.init();
 }
 
+
+
 void loop() {
-  pixels.clear(); // Set all pixel colors to 'off'
+  // pixels.clear(); // Set all pixel colors to 'off'
 
-  // The first NeoPixel in a strand is #0, second is 1, all the way up
-  // to the count of pixels minus one.
-  for(int i=0; i<NUMPIXELS; i++) { // For each pixel...
+  gameLogic.tick();
 
-    // pixels.Color() takes RGB values, from 0,0,0 up to 255,255,255
-    // Here we're using a moderately bright green color:
-    pixels.setPixelColor(i, pixels.Color(0, 150, 0));
-
-    pixels.show();   // Send the updated pixel colors to the hardware.
-
-    delay(DELAYVAL); // Pause before next pass through loop
-  }
+  delay(DELAYVAL); // Pause before next pass through loop
 }
