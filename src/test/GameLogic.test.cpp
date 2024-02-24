@@ -2,13 +2,6 @@
 
 #include "../main/GameLogic.cpp"
 
-
-#include <cstdint>
-
-uint32_t factorial( uint32_t number ) {
-    return number <= 1 ? number : factorial(number-1) * number;
-}
-
 TEST_CASE( "should init", "[test]" ) {
     GameLogic game;
     CellPlayerData* cell000 = game.getCellPlayerData({ Side::FRONT, 0, 0}, 0);
@@ -53,7 +46,7 @@ TEST_CASE( "should own simple square", "[test]" ) {
 
     player0->direction = Direction::RIGHT;
     game.tick();
-    player0->direction = Direction::DOWN;
+    player0->direction = Direction::UP;
     game.tick();
 
     REQUIRE( cell000->atPosition == false );

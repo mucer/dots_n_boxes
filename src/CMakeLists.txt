@@ -6,6 +6,7 @@ add_subdirectory(lib/Catch2)
 add_executable(tests
   test/tests.cpp
   test/GameLogic.test.cpp
+  test/CellPos.test.cpp
 )
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 

@@ -1,109 +1,248 @@
-enum class Direction { UP,
-                       DOWN,
-                       LEFT,
-                       RIGHT };
-enum class Side { FRONT,
-                  LEFT,
-                  TOP,
-                  RIGHT };
+#include <vector>
 
-struct CellPos {
+#define SIZE 16
+
+enum class Direction
+{
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT
+};
+enum class Side
+{
+  FRONT,
+  LEFT,
+  TOP,
+  RIGHT
+};
+
+struct CellPos
+{
   Side side;
   int x, y;
 
-  bool operator==(const CellPos& other) const {
+  bool operator==(const CellPos &other) const
+  {
     return side == other.side && x == other.x && y == other.y;
+  }
+
+  CellPos moveClone(Direction direction)
+  {
+    CellPos newPos = {side, x, y};
+    newPos.moveSelf(direction);
+    return newPos;
+  }
+
+  void moveSelf(Direction direction)
+  {
+    CellPos newPos = {side, x, y};
+    switch (direction)
+    {
+    case Direction::UP:
+      if (y >= SIZE - 1)
+      {
+        if (side == Side::FRONT)
+        {
+          side = Side::TOP;
+          y = 0;
+        }
+        else if (side == Side::LEFT)
+        {
+          side = Side::TOP;
+          y = SIZE - x - 1;
+          x = 0;
+        }
+        else if (side == Side::RIGHT)
+        {
+          side = Side::TOP;
+          y = x;
+          x = SIZE - 1;
+        }
+        side = Side::TOP;
+      }
+      else
+      {
+        y++;
+      }
+      break;
+    case Direction::DOWN:
+      if (y <= 0)
+      {
+        if (side == Side::TOP)
+        {
+          side = Side::FRONT;
+          y = SIZE - 1;
+        }
+      }
+      else
+      {
+        y--;
+      }
+      break;
+    case Direction::LEFT:
+      if (x <= 0)
+      {
+        if (side == Side::FRONT)
+        {
+          side = Side::LEFT;
+          x = SIZE - 1;
+        }
+        else if (side == Side::TOP)
+        {
+          side = Side::LEFT;
+          x = SIZE - y - 1;
+          y = SIZE - 1;
+        }
+        else if (side == Side::RIGHT)
+        {
+          side = Side::FRONT;
+          x = SIZE - 1;
+        }
+      }
+      else
+      {
+        x--;
+      }
+      break;
+    case Direction::RIGHT:
+      if (x >= SIZE - 1)
+      {
+        if (side == Side::FRONT)
+        {
+          side = Side::RIGHT;
+          x = 0;
+        }
+        else if (side == Side::TOP)
+        {
+          side = Side::RIGHT;
+          x = y;
+          y = SIZE - 1;
+        }
+        else if (side == Side::LEFT)
+        {
+          side = Side::FRONT;
+          x = 0;
+        }
+      }
+      else
+      {
+        x++;
+      }
+      break;
+    }
   }
 };
 
-struct Player {
+struct Player
+{
   CellPos pos;
   Direction direction;
 };
 
-struct CellPlayerData {
+struct CellPlayerData
+{
   bool atPosition, activeTrail, ownedBy;
 };
 
-class GameLogic {
+class GameLogic
+{
 public:
-  GameLogic() {
+  GameLogic()
+  {
     initArrays();
     updateMatrix();
   }
-  ~GameLogic() {
+  ~GameLogic()
+  {
     delete[] data;
     delete[] players;
   }
 
-  void tick() {
+  void tick()
+  {
     movePlayers();
     updateMatrix();
   }
 
-  CellPlayerData* getCellPlayerData(CellPos pos, int p) {
-    return &data[pos.y * cols + pos.x + p * rows * cols];
+  CellPlayerData *getCellPlayerData(CellPos pos, int p)
+  {
+    return &data[pos.y * SIZE + pos.x + p * SIZE * SIZE];
   }
 
-  Player* getPlayer(int p) {
+  Player *getPlayer(int p)
+  {
     return &players[p];
   }
 
-  void movePos(CellPos* pos, Direction direction) {
-    switch (direction) {
-      case Direction::UP:
-        if (pos->y > 0) pos->y--;
-        break;
-      case Direction::DOWN:
-        if (pos->y < rows - 1) pos->y++;
-        break;
-      case Direction::LEFT:
-        if (pos->x > 0) pos->x--;
-        break;
-      case Direction::RIGHT:
-        if (pos->x < cols - 1) pos->x++;
-        break;
-    }
+  std::vector<CellPos> getNeighbours(CellPos *pos)
+  {
+    std::vector<CellPos> vec;
+
+    CellPos up = pos->moveClone(Direction::UP);
+    CellPos down = pos->moveClone(Direction::DOWN);
+    CellPos left = pos->moveClone(Direction::LEFT);
+    CellPos right = pos->moveClone(Direction::RIGHT);
+
+    if (!(up == *pos))
+      vec.push_back(up);
+    if (!(down == *pos))
+      vec.push_back(down);
+    if (!(left == *pos))
+      vec.push_back(left);
+    if (!(right == *pos))
+      vec.push_back(right);
+
+    return vec;
   }
 
 private:
-  int numPlayers = 2, rows = 4, cols = 4;
-  CellPlayerData* data;
-  Player* players;
+  int numPlayers = 2;
+  CellPlayerData *data;
+  Player *players;
 
-  void initArrays() {
-    int cellCount = rows * cols * numPlayers;
+  void initArrays()
+  {
+    int cellCount = SIZE * SIZE * numPlayers;
     data = new CellPlayerData[cellCount];
     for (int i = 0; i < cellCount; i++)
-      data[i] = { false, false, false };
+      data[i] = {false, false, false};
     players = new Player[2];
-    players[0] = { { Side::FRONT, 0, 0 }, Direction::RIGHT };
-    players[1] = { { Side::FRONT, 1, 1 }, Direction::LEFT };
+    players[0] = {{Side::FRONT, 0, 0}, Direction::RIGHT};
+    players[1] = {{Side::FRONT, 1, 1}, Direction::LEFT};
   }
 
-  void movePlayers() {
-    for (int i = 0; i < numPlayers; i++) {
-      Player* player = &players[i];
-      movePos(&player->pos, player->direction);
+  void movePlayers()
+  {
+    for (int i = 0; i < numPlayers; i++)
+    {
+      Player *player = &players[i];
+      player->pos.moveSelf(player->direction);
     }
   }
 
-  void updateMatrix() {
-    for (int y = 0; y < rows; y++) {
-      for (int x = 0; x < cols; x++) {
-        for (int p = 0; p < numPlayers; p++) {
-          CellPos pos = { Side::FRONT, x, y };
+  void updateMatrix()
+  {
+    for (int y = 0; y < SIZE; y++)
+    {
+      for (int x = 0; x < SIZE; x++)
+      {
+        for (int p = 0; p < numPlayers; p++)
+        {
+          CellPos pos = {Side::FRONT, x, y};
           updateCell(pos, p);
         }
       }
     }
   }
 
-  void updateCell(CellPos pos, int p) {
-    Player* player = getPlayer(p);
-    CellPlayerData* cell = getCellPlayerData(pos, p);
+  void updateCell(CellPos pos, int p)
+  {
+    Player *player = getPlayer(p);
+    CellPlayerData *cell = getCellPlayerData(pos, p);
     cell->atPosition = pos == player->pos;
-    if (cell->atPosition && !cell->activeTrail) {
+    if (cell->atPosition && !cell->activeTrail)
+    {
       cell->activeTrail = true;
     }
   }
