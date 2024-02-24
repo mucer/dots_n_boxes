@@ -4,31 +4,44 @@
 
 #include <Adafruit_NeoPixel.h>
 #include "GameLogic.cpp"
+#include "Countdown.cpp"
 #ifdef __AVR__
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
 // Which pin on the Arduino is connected to the NeoPixels?
-#define PIN        6 // On Trinket or Gemma, suggest changing this to 1
+//#define PIN        6 // On Trinket or Gemma, suggest changing this to 1
 
 // How many NeoPixels are attached to the Arduino?
 #define NUMPIXELS 300 // Popular NeoPixel ring size
+
+#define NEOPIXEL_PIN 6
 
 // When setting up the NeoPixel library, we tell it how many pixels,
 // and which pin to use to send signals. Note that for older NeoPixel
 // strips you might need to change the third parameter -- see the
 // strandtest example for more information on possible values.
-Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+// pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels(NUMPIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 #define DELAYVAL 1000 // Time (in milliseconds) to pause between pixels
 
 GameLogic gameLogic;
 
+Countdown* countdown;
+
 void setup() {
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   Serial.begin(9600);
 Serial.println("setup");
-  gameLogic.init();
+  //gameLogic.init();
+  *countdown = Countdown(&pixels);
+
+  /*pixels.begin();
+  pixels.clear();
+  pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+  pixels.setPixelColor(1, pixels.Color(255, 0, 0));
+  pixels.show();*/
 }
 
 
@@ -36,7 +49,7 @@ Serial.println("setup");
 void loop() {
   // pixels.clear(); // Set all pixel colors to 'off'
 
-  gameLogic.tick();
+  //gameLogic.tick();
 
-  delay(DELAYVAL); // Pause before next pass through loop
+  //delay(DELAYVAL); // Pause before next pass through loop
 }
