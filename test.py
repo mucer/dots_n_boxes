@@ -1,5 +1,5 @@
 # Bibliotheken laden
-from machine import Pin, Timer
+from machine import Pin, Timer, ADC
 from neopixel import NeoPixel
 from time import sleep_ms
 #from webserver import Webserver
@@ -11,7 +11,7 @@ from lib.enums import Direction
 from lib.mapper import Mapper
 
 MATRIX_SIZE = 15
-speed = 250
+speed = 200
 
 class Player:
     
@@ -35,7 +35,6 @@ class Player:
             raise ValueError('player went out of matrix')
             
     def moveLeft(self):
-        print("left")
         self.direction = "left"
         
     def moveRight(self):
@@ -54,9 +53,7 @@ class Player:
         for b in self.body:
             if self.pos.x == b.x and self.pos.y == b.y: raise ValueError('player bite itself')
         
-    def addLength(self):
-        
-        print(self.previous_pos == self.pos)
+    def addLength(self):	
         if len(self.body) == 0:
             self.body.append(self.previous_pos)
         else:
@@ -65,10 +62,11 @@ class Player:
     def getSnakePixels(self):
         pass
         
-        
+
 class DisplayController:
-    topright_pixels = NeoPixel(Pin(28, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE * 2)
-    leftfront_pixels = NeoPixel(Pin(27, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE * 2)
+    topright_pixels = NeoPixel(Pin(16, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE * 2)
+    leftfront_pixels = NeoPixel(Pin(17, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE * 2)
+
     
     def __init__(self):
         self.mapper = Mapper(MATRIX_SIZE)
@@ -77,7 +75,7 @@ class DisplayController:
         self.topright_pixels.write()
         self.leftfront_pixels.write()
     
-    def writePixel(self, side: str, x: int, y: int):
+    def writePixel(self, side: str, x: int, y: int, color):
         pixelIndex = -1
         #if y % 2 == 0: # on odd rows
         #    pixelIndex = x + (y * MATRIX_SIZE);
@@ -87,9 +85,9 @@ class DisplayController:
         
         brightness = 10
         if 0 == pixelIndex[0]:
-            self.leftfront_pixels[pixelIndex[1]] = (brightness, brightness, brightness)
+            self.leftfront_pixels[pixelIndex[1]] = color
         elif 1 == pixelIndex[0]:
-            self.topright_pixels[pixelIndex[1]] = (brightness, brightness, brightness)
+            self.topright_pixels[pixelIndex[1]] = color
         
         
         #self.pixels[pixelIndex] = (brightness, brightness, brightness)
@@ -126,6 +124,9 @@ class GameLogic:
 
     right.attach_left(front, Direction.RIGHT)
     right.attach_top(top, Direction.RIGHT)
+    
+    snake_color = (0, 200, 0)
+    cookie_color = (20, 20, 20)
 
     players = [
         #Player(0, 0, 1),
@@ -142,7 +143,7 @@ class GameLogic:
             for player in self.players:
                 pass
                 if cookie.x == player.pos.x and cookie.y == player.pos.y:
-                    self.display_controller.fullColor(0, 22, 0)
+                    # self.display_controller.fullColor(0, 22, 0)
                     player.addLength()
                     self.cookies.remove(cookie)
         self.generateCookies()
@@ -159,26 +160,25 @@ class GameLogic:
         
     def writePlayerPosToMatrix(self):
         for player in self.players:
-            print(player.pos.side, player.pos.x, player.pos.y)
-            self.display_controller.writePixel(player.pos.side.name, player.pos.x, player.pos.y)
+            self.display_controller.writePixel(player.pos.side.name, player.pos.x, player.pos.y, self.snake_color)
             for b in player.body:
-                self.display_controller.writePixel(b.side.name, b.x, b.y)
+                self.display_controller.writePixel(b.side.name, b.x, b.y, self.snake_color)
             
     def writeCookiesToMatrix(self):
         for cookie in self.cookies:
-            self.display_controller.writePixel(cookie.side.name, cookie.x, cookie.y)
+            self.display_controller.writePixel(cookie.side.name, cookie.x, cookie.y, self.cookie_color)
             
-    def tick(self, timer):
+    def tick(self):
         self.display_controller.clearMatrix()
         try:
             self.movePlayers()
         except ValueError:
-            self.gameOver(timer)
+            self.gameOver()
         self.writePlayerPosToMatrix()
         self.writeCookiesToMatrix()
         self.display_controller.updateMatrix()
         
-    def gameOver(self, timer):
+    def gameOver(self):
         timer.deinit()
         self.display_controller.fullColor(255, 0, 0)
         sleep_ms(500)
@@ -189,19 +189,46 @@ class GameLogic:
         # restart the game
         self.players = [Player(CellPos(self.front, 0, 0), "up", 2)]
         #self.cookies = [(0,1),(0,2),(0,3),(0,4),(0,5)]
-        timer.init(period=speed, mode=Timer.PERIODIC, callback=gamelogic.tick)
+        timer.init(period=speed, mode=Timer.PERIODIC, callback=my_function)
 
 gamelogic = GameLogic()
 
 #webserver = Webserver()
 
+pot_x = ADC(Pin(26))
+pot_y = ADC(Pin(27))
+jcenter = 1000
 
-def my_function(self):
+def read_input(t):
+    dx = 32400-pot_x.read_u16()
+    dy = 32400-pot_y.read_u16()
+    if abs(dx) > abs(dy):
+        #print(f"x {dx}")
+        if dx > jcenter:
+            gamelogic.players[0].moveLeft()
+        elif dx < -jcenter:
+            gamelogic.players[0].moveRight()
+    else:
+        #print(f"y {dy}")
+        if dy > jcenter:
+            gamelogic.players[0].moveDown()
+        elif dy < -jcenter:
+            gamelogic.players[0].moveUp()
+
+# Create a Timer object
+timer2 = Timer(-1)
+# Set the interval to 1000 milliseconds (1 second)
+timer2.init(period=10, mode=Timer.PERIODIC, callback=read_input)
+
+
+def my_function(t):        
     gamelogic.tick()
+
 # Create a Timer object
 timer = Timer(-1)
 # Set the interval to 1000 milliseconds (1 second)
-timer.init(period=speed, mode=Timer.PERIODIC, callback=gamelogic.tick)
+timer.init(period=speed, mode=Timer.PERIODIC, callback=my_function)
+
 
 while True:
     #gamelogic.tick()
