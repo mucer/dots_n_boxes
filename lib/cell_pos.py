@@ -13,6 +13,7 @@ class CellPos:
         return hash((self.side.name, self.x, self.y))
 
     def move(self, direction):
+        old = self.clone()
         if direction == Direction.UP:
             if (self.y >= self.side.size - 1):
                 self.side.transfer_up(self)
@@ -33,5 +34,8 @@ class CellPos:
                 self.side.transfer_right(self)
             else:
                 self.x += 1
-        return self
+        return self != old
+    
+    def clone(self):
+        return CellPos(self.side, self.x, self.y)
     
