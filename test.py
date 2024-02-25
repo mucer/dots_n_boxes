@@ -13,6 +13,7 @@ class Player:
     pos_y = -1
     player_id = -1
     direction = "up"
+    body = []
     
     def __init__(self, x, y, direction, player_id):
         self.x = x
@@ -43,8 +44,16 @@ class Player:
     def moveDown(self):
         self.direction = "down"
         
+    def moveBody(self):
+        if len(self.body) > 0:
+            self.body.insert(0, (self.x,self.y))
+            self.body.pop()
+        
     def addLength(self):
-        self.length += 1
+        if len(self.body) == 0:
+            self.body.append((self.x, self.y))
+        else:
+            self.body.append((self.body[-1][0], self.body[-1][0]))
         
     def getSnakePixels(self):
         pass
@@ -94,6 +103,7 @@ class GameLogic:
             for player in self.players:
                 if cookie[0] == player.x and cookie[1] == player.y:
                     self.display_controller.fullColor(0, 22, 0)
+                    player.addLength()
                     self.cookies.remove(cookie)
         self.generateCookies()
                     
@@ -104,10 +114,13 @@ class GameLogic:
     def movePlayers(self):
         for player in self.players:
             player.move()
+            player.moveBody()
         
     def writePlayerPosToMatrix(self):
         for player in self.players:
             self.display_controller.writePixel(player.x, player.y)
+            for b in player.body:
+                self.display_controller.writePixel(b[0], b[1])
             
     def writeCookiesToMatrix(self):
         for cookie in self.cookies:
