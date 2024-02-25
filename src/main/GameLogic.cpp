@@ -1,4 +1,3 @@
-#include <vector>
 
 #define SIZE 16
 
@@ -173,27 +172,6 @@ public:
   Player *getPlayer(int p)
   {
     return &players[p];
-  }
-
-  std::vector<CellPos> getNeighbours(CellPos *pos)
-  {
-    std::vector<CellPos> vec;
-
-    CellPos up = pos->moveClone(Direction::UP);
-    CellPos down = pos->moveClone(Direction::DOWN);
-    CellPos left = pos->moveClone(Direction::LEFT);
-    CellPos right = pos->moveClone(Direction::RIGHT);
-
-    if (!(up == *pos))
-      vec.push_back(up);
-    if (!(down == *pos))
-      vec.push_back(down);
-    if (!(left == *pos))
-      vec.push_back(left);
-    if (!(right == *pos))
-      vec.push_back(right);
-
-    return vec;
   }
 
 private:

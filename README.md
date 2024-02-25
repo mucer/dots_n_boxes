@@ -1,5 +1,9 @@
 # Dots'n'Boxes
 
+Needs a ESP8266 due to memory constraints!
+
+Add following URL to "Preferences -> Additional board manager URLS" to be able to select the board: http://arduino.esp8266.com/stable/package_esp8266com_index.json
+
 ## Tests
 
 ```bash
