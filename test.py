@@ -8,9 +8,10 @@ from random import randrange
 from lib.cell_pos import CellPos
 from lib.side import Side
 from lib.enums import Direction
+from lib.mapper import Mapper
 
-MATRIX_SIZE = 16
-speed = 500
+MATRIX_SIZE = 15
+speed = 250
 
 class Player:
     
@@ -66,35 +67,66 @@ class Player:
         
         
 class DisplayController:
-    pixels = NeoPixel(Pin(28, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE)
+    topright_pixels = NeoPixel(Pin(28, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE * 2)
+    leftfront_pixels = NeoPixel(Pin(27, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE * 2)
+    
+    def __init__(self):
+        self.mapper = Mapper(MATRIX_SIZE)
     
     def updateMatrix(self):
-        self.pixels.write()
+        self.topright_pixels.write()
+        self.leftfront_pixels.write()
     
-    def writePixel(self, x: int, y: int):
+    def writePixel(self, side: str, x: int, y: int):
         pixelIndex = -1
-        if y % 2 == 0: # on odd rows
-            pixelIndex = x + (y * MATRIX_SIZE);
-        else:
-          pixelIndex = (MATRIX_SIZE - x - 1) + (y * MATRIX_SIZE);
+        #if y % 2 == 0: # on odd rows
+        #    pixelIndex = x + (y * MATRIX_SIZE);
+        #else:
+        #  pixelIndex = (MATRIX_SIZE - x - 1) + (y * MATRIX_SIZE);
+        pixelIndex = self.mapper.pos_to_pixel(side, x, y)
         
         brightness = 10
-        self.pixels[pixelIndex] = (brightness, brightness, brightness)
+        if 0 == pixelIndex[0]:
+            self.leftfront_pixels[pixelIndex[1]] = (brightness, brightness, brightness)
+        elif 1 == pixelIndex[0]:
+            self.topright_pixels[pixelIndex[1]] = (brightness, brightness, brightness)
+        
+        
+        #self.pixels[pixelIndex] = (brightness, brightness, brightness)
         
     def fullColor(self, r, g, b):
         self.clearMatrix()
         self.updateMatrix()
-        for i in range(0, MATRIX_SIZE * MATRIX_SIZE): self.pixels[i] = (r, g, b)
+        for i in range(0, MATRIX_SIZE * MATRIX_SIZE * 2): self.topright_pixels[i] = (r, g, b)
+        for i in range(0, MATRIX_SIZE * MATRIX_SIZE * 2): self.leftfront_pixels[i] = (r, g, b)
         self.updateMatrix()
         sleep_ms(500)
         self.clearMatrix()
         self.updateMatrix()
         
     def clearMatrix(self):
-        self.pixels.fill((0,0,0))
+        for m in [self.leftfront_pixels, self.topright_pixels]: m.fill((0, 0, 0))
         
 class GameLogic:
     front = Side("front", MATRIX_SIZE)
+    top = Side("top", MATRIX_SIZE)
+    left = Side("left", MATRIX_SIZE)
+    right = Side("right", MATRIX_SIZE)
+
+    front.attach_top(top, Direction.DOWN)
+    front.attach_left(left, Direction.RIGHT)
+    front.attach_right(right, Direction.LEFT)
+
+    top.attach_down(front, Direction.UP)
+    top.attach_left(left, Direction.UP)
+    top.attach_right(right, Direction.UP)
+
+    left.attach_right(front, Direction.LEFT)
+    left.attach_top(top, Direction.LEFT)
+
+    right.attach_left(front, Direction.RIGHT)
+    right.attach_top(top, Direction.RIGHT)
+
     players = [
         #Player(0, 0, 1),
         Player(CellPos(front, 0, 0), "up", 2)
@@ -127,13 +159,14 @@ class GameLogic:
         
     def writePlayerPosToMatrix(self):
         for player in self.players:
-            self.display_controller.writePixel(player.pos.x, player.pos.y)
+            print(player.pos.side, player.pos.x, player.pos.y)
+            self.display_controller.writePixel(player.pos.side.name, player.pos.x, player.pos.y)
             for b in player.body:
-                self.display_controller.writePixel(b.x, b.y)
+                self.display_controller.writePixel(b.side.name, b.x, b.y)
             
     def writeCookiesToMatrix(self):
         for cookie in self.cookies:
-            self.display_controller.writePixel(cookie.x, cookie.y)
+            self.display_controller.writePixel(cookie.side.name, cookie.x, cookie.y)
             
     def tick(self, timer):
         self.display_controller.clearMatrix()

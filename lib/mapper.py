@@ -42,6 +42,7 @@ class Mapper:
                    # y
                 i = (zero - (x - 1) * self.SIZE * 2) - 1 - y  # -1 to get offest
 
+        print("--", side)
         if side == "left" or side == "front":
             return [0, i]
         if side == "top" or side == "right":
