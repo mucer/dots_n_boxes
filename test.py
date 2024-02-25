@@ -4,7 +4,7 @@ from neopixel import NeoPixel
 from time import sleep_ms
 #from webserver import Webserver
 import webserver2
-import _thread
+from random import randrange
 
 MATRIX_SIZE = 16
 
@@ -14,10 +14,11 @@ class Player:
     player_id = -1
     direction = "up"
     
-    def __init__(self, x, y, player_id):
+    def __init__(self, x, y, direction, player_id):
         self.x = x
         self.y = y
         self.player_id = player_id
+        self.direction = direction
         
     def move(self):
         if self.direction == "left": self.x -= 1
@@ -41,6 +42,12 @@ class Player:
         
     def moveDown(self):
         self.direction = "down"
+        
+    def addLength(self):
+        self.length += 1
+        
+    def getSnakePixels(self):
+        pass
         
         
 class DisplayController:
@@ -74,9 +81,25 @@ class DisplayController:
 class GameLogic:
     players = [
         #Player(0, 0, 1),
-        Player(0, 0, 2)
+        Player(0, 0, "up", 2)
     ]
+    cookies = []
     display_controller = DisplayController()
+    
+    def __init__(self):
+        self.generateCookies()
+    
+    def checkCookies(self):
+        for cookie in self.cookies:
+            for player in self.players:
+                if cookie[0] == player.x and cookie[1] == player.y:
+                    self.display_controller.fullColor(0, 22, 0)
+                    self.cookies.remove(cookie)
+        self.generateCookies()
+                    
+    def generateCookies(self):
+        while len(self.cookies) < 2:
+            self.cookies.append((randrange(MATRIX_SIZE-1),randrange(MATRIX_SIZE-1)))
     
     def movePlayers(self):
         for player in self.players:
@@ -86,13 +109,19 @@ class GameLogic:
         for player in self.players:
             self.display_controller.writePixel(player.x, player.y)
             
+    def writeCookiesToMatrix(self):
+        for cookie in self.cookies:
+            self.display_controller.writePixel(cookie[0], cookie[1])
+            
     def tick(self, timer):
         self.display_controller.clearMatrix()
         try:
             self.movePlayers()
         except ValueError:
             self.gameOver(timer)
+        self.checkCookies()
         self.writePlayerPosToMatrix()
+        self.writeCookiesToMatrix()
         self.display_controller.updateMatrix()
         
     def gameOver(self, timer):
@@ -104,7 +133,7 @@ class GameLogic:
         self.display_controller.fullColor(255, 0, 0)
         
         # restart the game
-        self.players = [Player(0, 0, 2)]
+        self.players = [Player(0, 0, "up", 2)]
         timer.init(period=1000, mode=Timer.PERIODIC, callback=gamelogic.tick)
 
 gamelogic = GameLogic()
