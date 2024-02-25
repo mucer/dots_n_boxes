@@ -35,16 +35,20 @@ class Player:
             raise ValueError('player went out of matrix')
             
     def moveLeft(self):
-        self.direction = "left"
+        if self.direction != "right":
+            self.direction = "left"
         
     def moveRight(self):
-        self.direction = "right"
+        if self.direction != "left":
+            self.direction = "right"
         
     def moveUp(self):
-        self.direction = "up"
+        if self.direction != "down":
+            self.direction = "up"
         
     def moveDown(self):
-        self.direction = "down"
+        if self.direction != "up":
+            self.direction = "down"
         
     def moveBody(self):
         if len(self.body) > 0:
@@ -53,7 +57,7 @@ class Player:
         for b in self.body:
             if self.pos.x == b.x and self.pos.y == b.y: raise ValueError('player bite itself')
         
-    def addLength(self):	
+    def addLength(self):
         if len(self.body) == 0:
             self.body.append(self.previous_pos)
         else:
@@ -125,6 +129,8 @@ class GameLogic:
     right.attach_left(front, Direction.RIGHT)
     right.attach_top(top, Direction.RIGHT)
     
+    sides = [front, top, left, right]
+    
     snake_color = (0, 200, 0)
     cookie_color = (20, 20, 20)
 
@@ -149,8 +155,9 @@ class GameLogic:
         self.generateCookies()
                     
     def generateCookies(self):
-        while len(self.cookies) < 2:
-            self.cookies.append(CellPos(self.front, randrange(MATRIX_SIZE-1),randrange(MATRIX_SIZE-1)))
+        while len(self.cookies) < 6:
+            i = randrange(len(self.sides))
+            self.cookies.append(CellPos(self.sides[i], randrange(MATRIX_SIZE-1),randrange(MATRIX_SIZE-1)))
     
     def movePlayers(self):
         for player in self.players:
@@ -197,7 +204,7 @@ gamelogic = GameLogic()
 
 pot_x = ADC(Pin(26))
 pot_y = ADC(Pin(27))
-jcenter = 1000
+jcenter = 3000
 
 def read_input(t):
     dx = 32400-pot_x.read_u16()
