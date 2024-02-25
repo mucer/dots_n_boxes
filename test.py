@@ -6,7 +6,10 @@ from time import sleep_ms
 import webserver2
 import _thread
 
-MATRIX_SIZE = 16
+### Dani lib
+from lib.cell_pos import CellPos
+
+MATRIX_SIZE = 15
 
 class Player:
     pos_x = -1
@@ -44,32 +47,89 @@ class Player:
         
         
 class DisplayController:
-    pixels = NeoPixel(Pin(28, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE)
+    
+    def __init__(self, size: int):
+
+        self.MATRIX_SIZE = size
+
+        self.pixels_left_front = NeoPixel(Pin(29, Pin.OUT), self.MATRIX_SIZE * self.MATRIX_SIZE * 2)
+        self.pixels_top_right = NeoPixel(Pin(28, Pin.OUT), self.MATRIX_SIZE * self.MATRIX_SIZE * 2)
     
     def updateMatrix(self):
-        self.pixels.write()
+        self.pixels_left_front.write()
+        self.pixels_top_right.write()
     
-    def writePixel(self, x: int, y: int):
-        pixelIndex = -1
-        if y % 2 == 0: # on odd rows
-            pixelIndex = x + (y * MATRIX_SIZE);
-        else:
-          pixelIndex = (MATRIX_SIZE - x - 1) + (y * MATRIX_SIZE);
+    def writePixel(self, cell: CellPos):
         
+        if(cell.side.size != self.MATRIX_SIZE)
+
         brightness = 10
-        self.pixels[pixelIndex] = (brightness, brightness, brightness)
+        color = (brightness, brightness, brightness)
+
+        x = cell.x
+        y = cell.y
+        side = cell.name
+
+        if x >= self.MATRIX_SIZE or x < 0:
+            return False
+        if y >= self.MATRIX_SIZE or y < 0:
+            return False
+
+        i = 0  # strip index
+        max_val = self.MATRIX_SIZE * self.MATRIX_SIZE * 2
+
+        # --- first Strip
+        if side == "front":
+            if y % 2 == 0:  # ->
+                i = x + (y * self.MATRIX_SIZE) + (self.MATRIX_SIZE * (y + 1))
+            else:  # <-
+                i = (y * self.MATRIX_SIZE) + (self.MATRIX_SIZE * (y + 1)) - 1 - x
+        elif side == "left":
+            if y % 2 == 0:  # ->
+                i = x + (y * self.MATRIX_SIZE * 2)
+            else:  # <-
+                i = (self.MATRIX_SIZE - x - 1) + (y * (self.MATRIX_SIZE * 2) + X)
+
+        # --- second Strip
+        elif side == "top":
+            if y % 2 == 0:  # <-
+                i = max_val - (x + (self.MATRIX_SIZE * y * 2) + 1)
+            else:  # ->
+                i = max_val - ((self.MATRIX_SIZE - x - 1) + (y * (self.MATRIX_SIZE * 2) + self.MATRIX_SIZE) + 1)
+
+        elif side == "right":
+
+            zero = max_val - self.MATRIX_SIZE * 2
+
+            if x % 2 == 0:  # 1
+                            # |
+                i = (zero - x * self.MATRIX_SIZE * 2) + y
+
+            else:  # |
+                   # y
+                i = (zero - (x - 1) * self.MATRIX_SIZE * 2) - 1 - y  # -1 to get offest
+
+        if side == "left" or side == "front":
+            self.pixels_left_front[i] = color
+            return True
+        if side == "top" or side == "right":
+            self.pixels_top_right[i] = color
+            return True
         
     def fullColor(self, r, g, b):
         self.clearMatrix()
         self.updateMatrix()
-        for i in range(0, MATRIX_SIZE * MATRIX_SIZE): self.pixels[i] = (r, g, b)
+        for i in range(0, MATRIX_SIZE * MATRIX_SIZE * 2): self.pixels_left_front[i] = (r, g, b)
+        for i in range(0, MATRIX_SIZE * MATRIX_SIZE * 2): self.pixels_top_right[i] = (r, g, b)
         self.updateMatrix()
         sleep_ms(500)
         self.clearMatrix()
         self.updateMatrix()
         
     def clearMatrix(self):
-        self.pixels.fill((0,0,0))
+        self.pixels_left_front.fill((0,0,0))
+        self.pixels_top_right.fill((0,0,0))
+
         
 class GameLogic:
     players = [
@@ -127,4 +187,3 @@ while True:
     #webserver.tick()
     webserver2.webserver_hook(gamelogic)
     pass
-    
