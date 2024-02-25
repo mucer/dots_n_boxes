@@ -7,21 +7,20 @@ import webserver2
 from random import randrange
 
 MATRIX_SIZE = 16
+speed = 500
 
 class Player:
-    pos_x = -1
-    pos_y = -1
-    player_id = -1
-    direction = "up"
-    body = []
     
     def __init__(self, x, y, direction, player_id):
         self.x = x
         self.y = y
         self.player_id = player_id
         self.direction = direction
+        self.body = []
+        self.previous = (self.x, self.y)
         
     def move(self):
+        self.previous = (self.x, self.y)
         if self.direction == "left": self.x -= 1
         elif self.direction == "right": self.x += 1
         elif self.direction == "up": self.y += 1
@@ -31,6 +30,8 @@ class Player:
             #self.x, self.y = 0, 0
             #self.direction = "up"
             raise ValueError('player went out of matrix')
+        
+
             
     def moveLeft(self):
         self.direction = "left"
@@ -46,8 +47,10 @@ class Player:
         
     def moveBody(self):
         if len(self.body) > 0:
-            self.body.insert(0, (self.x,self.y))
+            self.body.insert(0, self.previous)
             self.body.pop()
+        for b in self.body:
+            if self.x == b[0] and self.y == b[1]: raise ValueError('player bite itself')
         
     def addLength(self):
         if len(self.body) == 0:
@@ -92,7 +95,7 @@ class GameLogic:
         #Player(0, 0, 1),
         Player(0, 0, "up", 2)
     ]
-    cookies = []
+    cookies = []#[(0,1),(0,2),(0,3),(0,4),(0,5)]
     display_controller = DisplayController()
     
     def __init__(self):
@@ -114,6 +117,7 @@ class GameLogic:
     def movePlayers(self):
         for player in self.players:
             player.move()
+            self.checkCookies()
             player.moveBody()
         
     def writePlayerPosToMatrix(self):
@@ -132,7 +136,6 @@ class GameLogic:
             self.movePlayers()
         except ValueError:
             self.gameOver(timer)
-        self.checkCookies()
         self.writePlayerPosToMatrix()
         self.writeCookiesToMatrix()
         self.display_controller.updateMatrix()
@@ -147,11 +150,10 @@ class GameLogic:
         
         # restart the game
         self.players = [Player(0, 0, "up", 2)]
-        timer.init(period=1000, mode=Timer.PERIODIC, callback=gamelogic.tick)
+        #self.cookies = [(0,1),(0,2),(0,3),(0,4),(0,5)]
+        timer.init(period=speed, mode=Timer.PERIODIC, callback=gamelogic.tick)
 
 gamelogic = GameLogic()
-
-speed = 500
 
 #webserver = Webserver()
 
