@@ -8,31 +8,56 @@ import network
 #html = """<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="shortcut icon" href="data:"><title>Raspberry Pi Pico</title></head><body><h1 align="center">Raspberry Pi Pico W</h1><p align="center">Verbindung mit %s</p></body></html>"""
 html = """
         <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Pico Web Server</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-        </head>
-        <body>
-            <h1>Raspberry Pi Pico Web Server</h1>
-            <h2>Snake</h2>
-            <form action="./right">
-                <input type="submit" value="Right" />
-            </form>
-            <br>
-            <form action="./left">
-                <input type="submit" value="Left" />
-            </form>
-            <br>
-            <form action="./up">
-                <input type="submit" value="Up" />
-            </form>
-            <br>
-            <form action="./down">
-                <input type="submit" value="Down" />
-            </form>
-        </body>
-        </html>
+<html>
+<head>
+    <title>Pico Web Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .arrow-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px; /* Höhe des Steuerkreuzes */
+        }
+        .arrow {
+            font-size: 48px;
+            width: 60px;
+            height: 60px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #007bff; /* Standardfarbe für die Pfeiltasten */
+            transition: color 0.3s; /* Animationsübergang */
+        }
+        .arrow:hover {
+            color: #0056b3; /* Farbe bei Hover */
+        }
+    </style>
+</head>
+<body>
+    <h1>Raspberry Pi Pico Web Server</h1>
+    <h2>Snake</h2>
+    <div class="arrow-container">
+        <form action="./up">
+            <button class="arrow" type="submit">&uarr;</button> <!-- Pfeil nach oben -->
+        </form>
+    </div>
+    <div class="arrow-container">
+        <form action="./left">
+            <button class="arrow" type="submit">&larr;</button> <!-- Pfeil nach links -->
+        </form>
+        <form action="./right">
+            <button class="arrow" type="submit">&rarr;</button> <!-- Pfeil nach rechts -->
+        </form>
+    </div>
+    <div class="arrow-container">
+        <form action="./down">
+            <button class="arrow" type="submit">&darr;</button> <!-- Pfeil nach unten -->
+        </form>
+    </div>
+</body>
+</html>
+
 """
 
 ap = network.WLAN(network.AP_IF)
