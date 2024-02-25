@@ -61,7 +61,8 @@ class DisplayController:
     
     def writePixel(self, cell: CellPos):
         
-        if(cell.side.size != self.MATRIX_SIZE)
+        if(cell.side.size != self.MATRIX_SIZE):
+            return False
 
         brightness = 10
         color = (brightness, brightness, brightness)
