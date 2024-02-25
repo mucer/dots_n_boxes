@@ -6,3 +6,5 @@ src/*.cmake
 src/*.a
 src/Makefile
 src/tests
+lib/__pycache__/
+lib/.pytest_cache/
