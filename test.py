@@ -2,6 +2,7 @@
 from machine import Pin, Timer
 from neopixel import NeoPixel
 from time import sleep_ms
+from Visualization import Visualization, Side
 #from webserver import Webserver
 import webserver2
 import _thread
@@ -46,18 +47,17 @@ class Player:
 class DisplayController:
     pixels = NeoPixel(Pin(28, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE)
     
+    def __init__(visualization: Visualization):
+
+        self.visualization = visualization
+
     def updateMatrix(self):
         self.pixels.write()
     
     def writePixel(self, x: int, y: int):
-        pixelIndex = -1
-        if y % 2 == 0: # on odd rows
-            pixelIndex = x + (y * MATRIX_SIZE);
-        else:
-          pixelIndex = (MATRIX_SIZE - x - 1) + (y * MATRIX_SIZE);
         
         brightness = 10
-        self.pixels[pixelIndex] = (brightness, brightness, brightness)
+        visualization.draw_pixel(Side.Top, x, y, (brightness, brightness, brightness))
         
     def fullColor(self, r, g, b):
         self.clearMatrix()
@@ -76,7 +76,7 @@ class GameLogic:
         #Player(0, 0, 1),
         Player(0, 0, 2)
     ]
-    display_controller = DisplayController()
+    display_controller = DisplayController(Visualization())
     
     def movePlayers(self):
         for player in self.players:
