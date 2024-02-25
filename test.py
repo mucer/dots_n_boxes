@@ -137,7 +137,7 @@ class GameLogic:
         #Player(0, 0, 1),
         Player(0, 0, 2)
     ]
-    display_controller = DisplayController()
+    display_controller = DisplayController(15)
     
     def movePlayers(self):
         for player in self.players:
