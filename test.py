@@ -12,6 +12,11 @@ from lib.enums import Direction
 MATRIX_SIZE = 16
 speed = 500
 
+directions =     ["up",
+                "down",
+                "left",
+                "right"]
+
 class Player:
     
     def __init__(self, pos, direction, player_id):
@@ -30,8 +35,7 @@ class Player:
         elif self.direction == "down": d = Direction.DOWN
         
         
-        if not self.pos.move(d):
-            raise ValueError('player went out of matrix')
+        self.direction = directions[self.pos.move(d)]:
             
     def moveLeft(self):
         print("left")

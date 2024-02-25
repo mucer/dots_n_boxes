@@ -28,43 +28,53 @@ class Side:
             pos.side = self.top
             if self.top_dir == Direction.DOWN:
                 pos.y = 0 
+                return Direction.UP
             elif self.top_dir == Direction.LEFT:
                 pos.y = self.size - pos.x - 1
                 pos.x = 0
+                return Direction.RIGHT
             elif self.top_dir == Direction.RIGHT:
                 pos.y = pos.x
-                pos.x = self.size - 1                
+                pos.x = self.size - 1    
+                return Direction.LEFT
+             
 
     def transfer_down(self, pos):
         if hasattr(self, "down"):
             pos.side = self.down
             pos.y = self.size - 1
+            return Direction.DOWN
 
     def transfer_left(self, pos):
         if hasattr(self, "left"):
             pos.side = self.left
             if self.left_dir == Direction.RIGHT:
                 pos.x = self.size - 1
+                return Direction.LEFT
             elif self.left_dir == Direction.UP:
                 pos.x = pos.y
                 pos.y = self.size - 1
+                return Direction.DOWN
             elif self.left_dir == Direction.DOWN:
                 pos.x = self.size - pos.y - 1
                 pos.y = 0
-
-            pos.x = self.size - 1
+                return Direction.UP
 
     def transfer_right(self, pos):
         if hasattr(self, "right"):
             pos.side = self.right
             if self.right_dir == Direction.LEFT:
                 pos.x = 0
+                return Direction.RIGHT
             elif self.right_dir == Direction.UP:
                 pos.x = pos.y
                 pos.y = self.size - 1
+                return Direction.DOWN
             elif self.right_dir == Direction.DOWN:
                 pos.x = pos.y
                 pos.y = 0
+                return Direction.UP
+
 
     
 
