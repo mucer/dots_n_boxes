@@ -7,7 +7,7 @@ from Visualization import Visualization, Side
 import webserver2
 import _thread
 
-MATRIX_SIZE = 16
+MATRIX_SIZE = 15
 
 class Player:
     pos_x = -1
@@ -45,19 +45,21 @@ class Player:
         
         
 class DisplayController:
-    pixels = NeoPixel(Pin(28, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE)
+    #pixels = NeoPixel(Pin(28, Pin.OUT), MATRIX_SIZE * MATRIX_SIZE)
     
-    def __init__(visualization: Visualization):
+    def __init__(self, visualization: Visualization):
 
         self.visualization = visualization
 
     def updateMatrix(self):
-        self.pixels.write()
+        #self.pixels.write()
+        pass
     
     def writePixel(self, x: int, y: int):
         
         brightness = 10
-        visualization.draw_pixel(Side.Top, x, y, (brightness, brightness, brightness))
+        c = (brightness, brightness, brightness)
+        self.visualization.draw_pixel(Side.TOP, x, y, c)
         
     def fullColor(self, r, g, b):
         self.clearMatrix()
@@ -69,7 +71,8 @@ class DisplayController:
         self.updateMatrix()
         
     def clearMatrix(self):
-        self.pixels.fill((0,0,0))
+        #self.pixels.fill((0,0,0))
+        pass
         
 class GameLogic:
     players = [
